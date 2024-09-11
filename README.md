@@ -4,15 +4,15 @@
 
 This repo includes the data and code presented in the manuscript "**POPANC: An analysis-ready database on presence-only and presence-absence data of Neotropical carnivores (Mammalia: Carnivora) from 2000 to 2021**".
 
-## Source data: the downloaded/digitised data sources
+## **Source data**: the downloaded/digitised *raw* data sources
 
 - 64 literature sources. See the files `literature_all_references.ods` for a complete list and `literature_digitised_references.bib` for the *BibTeX* bibliographical database.
 
-- GBIF.org. 2024. ‘Occurrence Download Neotropical Carnivores’. https://doi.org/10.15468/dl.67zvau 
+- GBIF.org. (2024). 'Occurrence Download Neotropical Carnivores'. https://doi.org/10.15468/dl.67zvau 
 
-- Nagy-Reis, Mariana et al. 2020. ‘NEOTROPICAL CARNIVORES: A Data Set on Carnivore Distribution in the Neotropics’. Ecology 101(11): e03128. https://doi.org/10.1002/ecy.3128 
+- Nagy-Reis et al. (2020). 'NEOTROPICAL CARNIVORES: A Data Set on Carnivore Distribution in the Neotropics'. *Ecology* 101(11): e03128. https://doi.org/10.1002/ecy.3128 
 
-## Underlying data: the data we generated
+## **Underlying data**: the data we generated
 
 ### Tables
 - `data/data_PO.csv`: cleaned, standardised and harmonised presence-only data.
@@ -36,6 +36,14 @@ This repo includes the data and code presented in the manuscript "**POPANC: An a
 - `metadata/literature_all_references.ods`: an open-source spreadsheet file with literature references (title and DOI or URL) including 4 sheets; `articles_EXCLUDED` articles that did not fulfil our assumptions and were excluded (reasons are reported in the column notes), `articles_DUPLICATED`: articles that were found it the reference lists of other datasets already digitised (e.g. Nagy-Reis et al., 2019), `articles_DIGITISED` articles that were digitised and included in the data, and `articles_TO_PROCESS`: articles that fulfil our assumptions but were not digitised.  
 
 - `metadata/literature_digitised_references.bib`: BibTeX bibliographical database file with the 64 literature references digitised and included in our database.  
+
+
+## **Extended Data**: the code we used to process the data
+
+- `sources_species_and_countries.qmd`: an overview of the different sources, carnivore species and countries considered in the study.
+- `presence-absence.qmd`: an overview of the presence-absence records in the database, including the geographic, taxonomic and temporal coverage of the data.
+- `presence-only.qmd`:  an overview of the presence-only records in the database, including the geographic, taxonomic and temporal coverage of the data. 
+- `analysis_ready_data.qmd`: a full descriptive code to reproduce the generation of `PO.gpk` (a multi polygon sf file with 2,265 grid cells of 100 x 100 km resolution with counts per species at each time period) and `PA.gpk`(a multi polygon sf file with 565 varying size polygons of presences/absences values for each species, area of the polygon, and sampling effort in days in the temporal period).
 
 ---
 

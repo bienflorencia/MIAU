@@ -1,8 +1,8 @@
-# Data of Neotropical carnivores (Mammalia: Carnivora) from 2000-2020
+# POPANC 
 
 *Florencia Grattarola <a dir="ltr" href="http://orcid.org/0000-0001-8282-5732" target="_blank"><img class="is-rounded" src="https://upload.wikimedia.org/wikipedia/commons/0/06/ORCID_iD.svg" width="15"></a>, Kateřina Tschernosterová, Petr Keil*
 
-This repo includes the data and code presented in the manuscript "An analysis-ready database on presence-only and presence-absence data of Neotropical carnivores (Mammalia: Carnivora) from 2000-2020".
+This repo includes the data and code presented in the manuscript "**POPANC: An analysis-ready database on presence-only and presence-absence data of Neotropical carnivores (Mammalia: Carnivora) from 2000 to 2021**".
 
 ## Source data: the downloaded/digitised data sources
 
@@ -45,7 +45,7 @@ This repo includes the data and code presented in the manuscript "An analysis-re
 
 ## CITATION
 
-> Grattarola F., Tschernosterová K., & Keil P. (2024); POPANC: An analysis-ready database on presence-only and presence-absence data of Neotropical carnivores (Mammalia: Carnivora) from 2000 to 2021; Zenodo; [DOI from Zenodo provided once the GitHub repository is archived]. [Dataset] [Code]
+> Grattarola F., Tschernosterová K., & Keil P. (2024); POPANC: An analysis-ready database on presence-only and presence-absence data of Neotropical carnivores (Mammalia: Carnivora) from 2000 to 2021; Zenodo; [DOI from Zenodo provided once the GitHub repository is archived]. [Dataset] / [Code]
 
 If you use our underlying data, please also cite the source data as well.
 

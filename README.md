@@ -50,13 +50,13 @@ This repo includes the data and code presented in the manuscript "**POPANC: An a
 ---
 
 ## LICENCE
+
 **Data** are available under the terms of the Creative Commons Attribution 4.0 International licence CC-BY 4.0 (https://creativecommons.org/licenses/by/4.0/legalcode.en).   
+
 **Code** is available under the terms of the GPL-3.0 licence (https://www.gnu.org/licenses/gpl-3.0.html). 
 
 ## CITATION
 
 > Grattarola F., Tschernosterová K., & Keil P. (2024); POPANC: An analysis-ready database on presence-only and presence-absence data of Neotropical carnivores (Mammalia: Carnivora) from 2000 to 2021; Zenodo; [DOI from Zenodo provided once the GitHub repository is archived]. [Dataset] / [Code]
 
-If you use our underlying data, please also cite the source data as well.
-
-**Data** are available under the terms of the Creative Commons Attribution 4.0 International licence CC-BY 4.0 (https://creativecommons.org/licenses/by/4.0/legalcode.en). **Code** is available under the terms of the GPL-3.0 licence (https://www.gnu.org/licenses/gpl-3.0.html). 
+If you use our underlying data, please also cite the **source** data as well.

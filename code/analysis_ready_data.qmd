@@ -1,0 +1,501 @@
+---
+title: 'Prepare analysis-ready data'
+format: 
+  html:
+    toc: true
+    toc-location: right
+    smooth-scroll: true
+    html-math-method: katex
+    df-print: kable
+    # code-fold: true
+author: 'Florencia Grattarola'
+date: "`r format(Sys.time(), '%Y-%m-%d')`"
+editor: source
+self-contained: true
+---
+
+R libraries
+
+```{r}
+#| label: libraries
+#| echo: true
+#| eval: true
+#| message: false
+#| warning: false
+
+library(sf)
+sf::sf_use_s2(FALSE)
+library(tidyverse)
+```
+
+## Data and countries
+
+```{r}
+#| label: countries
+#| echo: true
+#| eval: true
+#| message: false
+#| warning: false
+
+countries <- st_read('data/latam.gpkg', quiet = T, layer='countries')
+latam <- st_read('data/latam.gpkg', quiet = T, layer='latam')
+
+PO_gbif <- read_csv('data/DATA_presence-only-gbif.csv') 
+PO_datapaper <- read_csv('data/DATA_presence-only-datapaper.csv') %>% 
+  mutate(occurrenceID = as.character(occurrenceID))
+PO <- bind_rows(PO_gbif, PO_datapaper)
+
+PA_datapaper <- read_csv('data/DATA_presence-absence-datapaper.csv')
+PA_literature <- read_csv('data/DATA_presence-absence-literature.csv')
+PA <- bind_rows(PA_datapaper, PA_literature)
+```
+
+## Presence-only grid-cells
+
+### Create grid-cells
+
+The size of each grid-cell is 100x100 km (100km=100000m)
+
+```{r}
+#| label: grid-cells
+#| echo: true
+#| eval: false
+#| message: false
+#| warning: false
+
+latam_grids <- st_make_grid(latam, 100000) %>%
+  st_intersection(latam) %>% 
+  st_sf(gridID=1:length(.)) %>% 
+  st_set_geometry('geometry') %>% 
+  st_make_valid() %>% st_cast()
+```
+
+```{r}
+#| label: grid-cells-save
+#| echo: false
+#| eval: false
+#| message: false
+#| warning: false
+
+st_write(latam_grids, dsn='data/latam.gpkg', layer='latam_grids')
+```
+
+```{r}
+#| label: read-grid-cells
+#| echo: false
+#| eval: true
+#| message: false
+#| warning: false
+#| code-fold: true
+
+
+latam_grids <- st_read('data/latam.gpkg', layer = 'latam_grids', quiet = T)
+```
+
+### Plot grid-cells 
+
+Empty, no species data yet.
+
+```{r}
+#| label: grid-cells-plot
+#| echo: true
+#| eval: true
+#| message: false
+#| warning: false
+#| code-fold: true
+#| out-width: 100%
+#| fig-dpi: 200
+
+ggplot() + 
+    geom_sf(data=latam_grids, fill='grey95', col='grey60') +
+    geom_sf(data=countries, fill=NA, col='#bfc5c7', size=0.2) +
+    coord_sf(xlim = c(-3500000, 4100000), ylim = c(-4400000, 3000000)) +
+    theme_bw() +    
+    theme(text=element_text(size = 12)) 
+```
+
+
+### Calculate the number of records per grid-cell for each species
+
+```{r}
+#| label: PO-grids
+#| echo: true
+#| eval: false
+#| message: false
+#| warning: false
+
+data_PO <- PO %>%
+  st_as_sf(coords=c('decimalLongitude', 'decimalLatitude')) %>%
+  st_set_crs(4326) %>% st_transform(crs=st_crs(latam))
+
+PO_time1 <- st_join(latam_grids, data_PO %>% filter(year<2014)) %>% 
+    group_by(gridID, scientificName) %>% 
+    summarise(NR=ifelse(n_distinct(scientificName, na.rm=T)!=0, n(), 0)) %>% 
+    pivot_wider(names_from = scientificName, names_sep = '_',
+                values_from = NR, values_fill = 0) %>% select(-`NA`) %>% 
+    rename_with(., ~str_replace(., ' ', '_'))
+
+PO_time2 <- st_join(latam_grids, data_PO %>% filter(year>=2014)) %>% 
+    group_by(gridID, scientificName) %>% 
+    summarise(NR=ifelse(n_distinct(scientificName, na.rm=T)!=0, n(), 0)) %>% 
+    pivot_wider(names_from = scientificName, names_sep = '_',
+                values_from = NR, values_fill = 0) %>% select(-`NA`) %>% 
+    rename_with(., ~str_replace(., ' ', '_'))
+```
+
+### Save the grid-cells
+
+```{r}
+#| label: PO-grids-save
+#| echo: true
+#| eval: false
+#| message: false
+#| warning: false
+#| code-fold: true
+
+st_write(PO_time1, dsn='data/PO.gpkg', layer='time1')
+st_write(PO_time2, dsn='data/PO.gpkg', layer='time2')
+```
+
+```{r}
+#| label: PO-grids-read
+#| echo: false
+#| eval: true
+#| message: false
+#| warning: false
+
+PO_time1 <- st_read('data/PO.gpkg', layer = 'time1', quiet = T)
+PO_time2 <- st_read('data/PO.gpkg', layer = 'time2', quiet = T)
+```
+
+### Example plot: *Herpailurus yagouaroundi*
+
+```{r}
+#| label: example-PO-plot
+#| echo: true
+#| eval: true
+#| message: false
+#| warning: false
+#| out-width: 100%
+#| fig-dpi: 200
+
+data_PO_time1_time2 <- bind_rows(PO_time1 %>% mutate(period='time1'),
+                                 PO_time2 %>% mutate(period='time2'))
+
+ggplot() + 
+    geom_sf(data=data_PO_time1_time2 %>%
+                mutate(Herpailurus_yagouaroundi=if_else(Herpailurus_yagouaroundi==0, 
+                                                        NA, Herpailurus_yagouaroundi)), 
+            aes(fill=Herpailurus_yagouaroundi), col=NA) +
+    scale_fill_distiller(palette='YlOrBr', direction = 1, na.value = 'grey95')+
+    geom_sf(data=countries, fill=NA, col='#bfc5c7', size=0.2) +
+    facet_wrap(~period)+
+    labs(title='presence-only', fill='counts') +
+    coord_sf(xlim = c(-3500000, 4100000), ylim = c(-4400000, 3000000)) + 
+    theme_bw() +    
+    theme(text=element_text(size = 12))  
+
+```
+
+## Presence-absence polygons
+
+### Create polygons for time1 and time2 (according to the data at each period)
+
+We first standardise area and effort units and split the data in the two time periods, summarising the records into individual surveys. Then we create a buffer area with the coordinates of each survey and the study's area as buffer area. Finally, we aggregate overlapping polygons and combine them into single polygons. This is just empty polygons (their geometry). 
+
+```{r}
+#| label: PA-polygons
+#| echo: true
+#| eval: true
+#| message: false
+#| warning: false
+
+time1_period = interval(ymd('2000-01-01'), ymd('2013-12-31'))
+time2_period = interval(ymd('2014-01-01'), today())
+
+# standardise data to be in the same units for area and effort
+PA <- PA %>% 
+  mutate(area_m2 = case_when(totalAreaSampledUnit == 'ha' ~ (totalAreaSampledValue * 10000),
+                             totalAreaSampledUnit == 'km2' ~ (totalAreaSampledValue * 1000000),
+                             totalAreaSampledUnit == 'm2' ~ totalAreaSampledValue,
+                             .default = NA)) %>% 
+  mutate(effort_days = case_when(samplingEffortUnit == 'camera trap hours' ~ (samplingEffortValue / 24),
+                                 .default = samplingEffortValue)) %>% 
+  mutate(span = interval(dateStart, dateEnd), 
+         independentLocation = str_c(decimalLatitude,':', decimalLongitude),
+         independentYearSpan = str_c(year(dateStart),':', year(dateEnd)),
+         period = case_when(span %within% time2_period ~ 'time2',
+                            span %within% time1_period ~ 'time1',
+                            .default = NA)) %>% filter(!is.na(period)) 
+  
+# keep all the point locations of the studies per each time period to make polygons
+PA_allsites <- PA %>% 
+  select(recordID, dateStart, dateEnd, decimalLatitude, decimalLongitude,
+         eventDurationValue, eventDurationUnit, eventDurationRemarks,
+         samplingEffortValue, samplingEffortUnit, area_m2,
+         independentLocation, independentYearSpan, period) %>% 
+  distinct(independentLocation, period, .keep_all = T) %>% 
+  sf::st_as_sf(coords=c('decimalLongitude', 'decimalLatitude')) %>% 
+  sf::st_set_crs(4326) %>% st_transform(crs=st_crs(latam))
+
+# buffer the point locations with the area of the study to create polygons
+PA_allsites_buff <- st_buffer(PA_allsites, sqrt(PA_allsites$area_m2/pi))
+
+# aggregate overlapping polygons for each time period
+blobs_time1 <- PA_allsites_buff %>% filter(period=='time1') %>% 
+  st_union() %>% st_cast('POLYGON') %>% st_sf('ID'= 1:length(.)) %>% 
+  st_set_geometry('geometry')
+blobs_time2 <- PA_allsites_buff %>% filter(period=='time2') %>% 
+  st_union() %>% st_cast('POLYGON') %>% st_sf('ID'= 1:length(.)) %>% 
+  st_set_geometry('geometry')
+
+```
+
+### Plot polygons 
+
+Empty, no species data yet.
+
+```{r}
+#| label: polygons-plot
+#| echo: true
+#| eval: true
+#| message: false
+#| warning: false
+#| code-fold: true
+#| out-width: 100%
+#| fig-dpi: 200
+
+blobs_time1_time2 <- bind_rows(blobs_time1 %>% mutate(period='time1'), 
+                               blobs_time2 %>% mutate(period='time2'))
+
+ggplot() + 
+    geom_sf(data=countries, fill='#fafaf8', col='#bfc5c7', size=0.2) +
+    geom_sf(data=blobs_time1_time2, fill='grey15', col=NA) +
+    coord_sf(xlim = c(-3500000, 4100000), ylim = c(-4400000, 3000000)) +
+    facet_wrap(~period) +
+    theme_bw() +    
+    theme(text=element_text(size = 12)) 
+```
+
+
+### Calculate temporal span and effort in days for each **survey study** at each time period
+
+For each individual survey we calculate the total temporal span and effort accounted for in the study. 
+
+```{r}
+#| label: PA-polygons-blobs
+#| echo: true
+#| eval: true
+#| message: false
+#| warning: false
+
+PA_allsites_effort_and_time  <- PA %>%
+  select(recordID, dateStart, dateEnd, decimalLatitude, decimalLongitude,
+         eventDurationValue, eventDurationUnit, eventDurationRemarks,
+         samplingEffortValue, samplingEffortUnit, effort_days, area_m2,
+         independentLocation, independentYearSpan, period) %>% 
+  group_by(independentLocation, independentYearSpan, area_m2) %>%
+  summarise(effort=max(effort_days),
+            period=paste(unique(period)),
+            recordIDs=paste(unique(recordID), collapse = ';'),
+            maxEndDate=max(dateEnd),
+            minStartDate=min(dateStart)) %>% 
+  mutate(maxTemporalSpan= as.numeric(maxEndDate-minStartDate)) %>% 
+  mutate(decimalLatitude = as.numeric(word(independentLocation, 1, sep=':')),
+         decimalLongitude = as.numeric(word(independentLocation, 2, sep=':')))
+
+# make it a spatial object
+PA_allsites_effort_and_time <- PA_allsites_effort_and_time %>% 
+  sf::st_as_sf(coords=c('decimalLongitude', 'decimalLatitude')) %>% 
+  sf::st_set_crs(4326) %>% st_transform(crs=st_crs(latam))
+```
+
+### Calculate temporal span and effort in days for each **polygon** at each time period
+
+Finally we merge the combined polygons with the information on the surveys they represent, considering effort as the sum of the effort per individual survey done inside the polygon, and the temporal span as the maximum number of days between the start of the first study and the end of the last.
+
+```{r}
+#| label: PA-polygons-effort
+#| echo: true
+#| eval: true
+#| message: false
+#| warning: false
+
+# to calculate the effort in days for each blob, we need to differentiate the two periods
+blobs_efforttime_time1 <- st_join(blobs_time1, 
+                            PA_allsites_effort_and_time %>% filter(period=='time1'),
+                            left=TRUE)  %>% 
+  group_by(ID) %>% 
+  summarise(effort=sum(effort),
+            temporalSpan=sum(maxTemporalSpan),
+            recordIDs=paste(unique(recordIDs), collapse = ';')) %>% 
+  mutate(area=st_area(.)) 
+
+
+blobs_efforttime_time2 <- st_join(blobs_time2, 
+                                PA_allsites_effort_and_time %>% filter(period=='time2'),
+                                left=TRUE)  %>% 
+  group_by(ID) %>% 
+  summarise(effort=sum(effort),
+            temporalSpan=sum(maxTemporalSpan),
+            recordIDs=paste(unique(recordIDs), collapse = ';')) %>% 
+  mutate(area=st_area(.))
+```
+
+### Generate 0 (zeros) for each **survey study** where the species haven't been recorded
+
+For each study we then generate zeros where the species are not present (out of the total list of species recorded). In this way we assume presence=0 if a study did not detect the species.
+
+```{r}
+#| label: PA-polygons-zeros
+#| echo: true
+#| eval: true
+#| message: false
+#| warning: false
+
+# This can very probably be done in a more efficient way, but this one works!
+PA_0 <- PA %>% rename(effort=effort_days) %>% 
+  pivot_wider(names_from = scientificName,
+              values_from = c(presence, effort),
+              values_fill = c(list(presence=0), 
+                              list(effort=0))) %>% 
+  pivot_longer(cols=starts_with(c('presence_', 'effort_')),
+               names_to=c('metric', 'scientificName'),
+               names_sep='_') %>%  
+  pivot_wider(names_from = metric,
+              values_from = value,
+              values_fill = c(list(value=0))) %>% 
+  distinct(scientificName, independentYearSpan, independentLocation, presence, .keep_all = T) %>%
+  group_by(scientificName, independentYearSpan, independentLocation) %>% 
+  mutate(presence=sum(presence),
+         effort=max(effort))  %>% 
+  distinct(scientificName, independentYearSpan, independentLocation, .keep_all = T) %>%
+  ungroup() %>%
+  group_by(independentLocation, independentYearSpan) %>% 
+  mutate(effort=max(effort)) %>% 
+  ungroup() 
+
+# make it a spatial object
+PA_0_sf <- PA_0 %>% 
+  sf::st_as_sf(coords=c('decimalLongitude', 'decimalLatitude')) %>% 
+  st_set_crs(4326) %>% 
+  st_transform(crs=st_crs(latam))
+```
+
+### Calculate presences/absence for each species at each polygon in each time period
+
+To do this we create two functions, one that returns the presence/absence for each species at each polygon in time and another that does this recursively for all species.
+
+```{r}
+#| label: PA-polygons-species-functions
+#| echo: true
+#| eval: true
+#| message: false
+#| warning: false
+
+time1_period = interval(ymd('2000-01-01'), ymd('2013-12-31'))
+time2_period = interval(ymd('2014-01-01'), today())
+
+calculate_PA_sp_blobs <- function(PA, blobs, sp, time){
+
+  df_period <- PA %>% 
+    filter(scientificName==sp & presence==1 & period == time) %>% 
+    select(scientificName, presence, period)
+  
+  df_period_blobs <- st_join(blobs, df_period,
+                             left=TRUE, join = st_contains) %>%
+    group_by(ID) %>% 
+    summarise(presence = max(presence),
+              temporalSpan = max(temporalSpan),
+              effort = max(effort),
+              area = max(area)) %>% 
+    mutate(presence = ifelse(is.na(presence), 0, presence),
+           period = time) %>% relocate(ID, period) %>% 
+  return(df_period_blobs)
+}
+
+calculate_PA_ALL_sp_blobs <- function(PA, blobs, sp_list, time) {
+  
+  sp_blobs <- blobs %>% select(ID, effort, temporalSpan, area) %>% 
+    mutate(period=time)
+  
+  for(sp in sp_list){
+    PA_sp_time_blobs <- calculate_PA_sp_blobs(PA, blobs, sp, time) %>% 
+      mutate(species = str_replace(sp, ' ',  '_')) %>% select(species, presence) %>% 
+      pivot_wider(names_from = species, values_from = presence) 
+    
+    sp_blobs <- st_join(sp_blobs, PA_sp_time_blobs)
+  }
+  return(sp_blobs)
+}
+
+```
+
+And we run the function
+
+```{r}
+#| label: PA-polygons-species
+#| echo: true
+#| eval: false
+#| message: false
+#| warning: false
+
+sp_list <- unique(PA_0_sf$scientificName)
+
+PA_ALL_sp_blobs_time1 <- calculate_PA_ALL_sp_blobs(PA_0_sf, blobs_efforttime_time1, sp_list, 'time1')
+PA_ALL_sp_blobs_time2 <- calculate_PA_ALL_sp_blobs(PA_0_sf, blobs_efforttime_time2, sp_list, 'time2')
+```
+
+### Save the polygons
+
+```{r}
+#| label: PA-polygons-save
+#| echo: true
+#| eval: false
+#| message: false
+#| warning: false
+#| code-fold: true
+
+st_write(PA_ALL_sp_blobs_time1, dsn='data/PA.gpkg', layer='time1')
+st_write(PA_ALL_sp_blobs_time2, dsn='data/PA.gpkg', layer='time2')
+```
+
+```{r}
+#| label: PA-polygons-read
+#| echo: false
+#| eval: true
+#| message: false
+#| warning: false
+
+PA_ALL_sp_blobs_time1 <- st_read('data/PA.gpkg', layer = 'time1', quiet = T)
+PA_ALL_sp_blobs_time2 <- st_read('data/PA.gpkg', layer = 'time2', quiet = T)
+```
+
+### Example plot: *Herpailurus yagouaroundi*
+
+```{r}
+#| label: example-PA-plot
+#| echo: true
+#| eval: true
+#| message: false
+#| warning: false
+#| code-fold: true
+#| out-width: 100%
+#| fig-dpi: 200
+
+PA_hyagouaroundi_time1_blobs <- PA_ALL_sp_blobs_time1 %>% select(c(1:6, Herpailurus_yagouaroundi))
+PA_hyagouaroundi_time2_blobs <- PA_ALL_sp_blobs_time2 %>% select(c(1:6, Herpailurus_yagouaroundi))
+
+data_PA_time1_time2 <- bind_rows(PA_hyagouaroundi_time1_blobs,PA_hyagouaroundi_time2_blobs)
+
+ggplot() + 
+    geom_sf(data=countries, fill='#fafaf8', col='#bfc5c7', size=0.2) +
+    geom_sf(data=data_PA_time1_time2, 
+            aes(fill=factor(Herpailurus_yagouaroundi)), col=NA) +
+    scale_fill_manual(values = c('#f1a340','#998ec3'))+
+    facet_wrap(~period)+
+    labs(title='presence-absence', fill='') +
+    coord_sf(xlim = c(-3500000, 4100000), ylim = c(-4400000, 3000000)) + 
+    theme_bw() +    
+    theme(text=element_text(size = 12)) 
+```

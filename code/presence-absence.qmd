@@ -1,0 +1,308 @@
+---
+title: 'Presence-absence data'
+format: 
+  html:
+    toc: true
+    toc-location: right
+    smooth-scroll: true
+    html-math-method: katex
+    df-print: kable
+    code-fold: true
+author: 'Florencia Grattarola'
+date: '`r format(Sys.time(), "%Y-%m-%d")`'
+editor: source
+self-contained: true
+---
+
+```{r}
+#| label: libraries
+#| echo: true
+#| eval: true
+#| message: false
+#| warning: false
+
+library(plotly)
+library(packcircles)
+library(ggiraph)
+library(countrycode)
+library(tmap)
+tmap_mode('view')
+library(sf)
+sf::sf_use_s2(FALSE)
+library(tidyverse)
+```
+
+## Data
+
+### List of species
+
+```{r}
+#| label: species
+#| echo: true
+#| eval: true
+#| message: false
+#| warning: false
+#| code-fold: false
+
+carnivores <- read_csv('data/carnivores.csv')
+```
+
+**Number of carnivore species in the Neotropics** = `r nrow(carnivores)`
+
+### Countries
+
+```{r}
+#| label: countries
+#| echo: true
+#| eval: true
+#| message: false
+#| warning: false
+#| code-fold: false
+
+countries <- st_read('data/latam.gpkg', layer = 'countries', quiet = T)
+```
+
+**Number of countries in the Neotropics** = `r nrow(countries %>% filter(!iso_a2 %in% c('TT', 'DO', 'CU', 'BS', 'JM', 'HT')))`
+
+### Presence only records
+
+```{r}
+#| label: data
+#| echo: true
+#| eval: true
+#| message: false
+#| warning: false
+#| code-fold: false
+
+PA <- read_csv('data/data_PA.csv')
+
+data_PA <- PA %>% 
+  st_as_sf(coords=c('decimalLongitude', 'decimalLatitude')) %>%
+  st_set_crs(4326)
+```
+
+**Number of PA records of presences (= 1)** = `r nrow(PA %>% filter(presence ==1))`  
+**Number of PA records of absences (= 0)** = `r nrow(PA %>% filter(presence ==0))`  
+**Number of species represented in the PA data** = `r nrow(PA %>% distinct(scientificName))` (`r round((nrow(PA %>% distinct(scientificName)) / nrow(carnivores))*100, 1)` %)
+
+#### Sources
+
+Top 10 data sources (dataset names)
+
+```{r}
+#| label: sources
+#| echo: true
+#| eval: true
+#| message: false
+#| warning: false
+
+PA %>% 
+  count(datasetName, dataSource) %>% 
+  arrange(desc(n)) %>% filter(!is.na(datasetName)) %>% 
+  slice_head(n=10) %>% 
+  rename(`Dataset name`= datasetName, 
+         `Data source` = dataSource) %>% 
+  mutate(`%` = formattable::percent(n / sum(n))) %>% 
+  kableExtra::kbl()
+
+```
+
+**Number of datasets involved in the PA data** = `r nrow(PA %>% distinct(datasetName))`  
+**Number of datasets involved in the PA data from the literature** = `r nrow(PA %>% filter(dataSource=='literature') %>% distinct(datasetName))`  
+**Number of datasets involved in the PA data from the data paper** = `r nrow(PA %>% filter(dataSource=='data paper') %>% distinct(datasetName))`  
+
+## Geographic coverage
+
+Data are summarised per camera trap study (`datasetName`)
+
+```{r}
+#| label: geographic-coverage-map
+#| echo: true
+#| eval: true
+#| message: false
+#| warning: false
+#| out-width: 100%
+#| fig-dpi: 200
+
+tmap_mode('view')
+data_PA %>% 
+  group_by(datasetName) %>% 
+  summarise(country = first(country), 
+            eventDurationValue = first(eventDurationValue),
+            eventDurationUnit = first(eventDurationUnit),
+            samplingEffortValue = first(samplingEffortValue),
+            samplingEffortUnit = first(samplingEffortUnit),
+            totalAreaSampledValue = first(totalAreaSampledValue),
+            totalAreaSampledUnit = first(totalAreaSampledUnit),
+            dataSource = first(dataSource),
+            n_species=n_distinct(scientificName)) %>% st_cast('POINT') %>% 
+  tm_shape() +
+    tm_dots(size = 0.25) + 
+    tm_shape(countries) +
+    tm_borders(col='grey60', alpha = 0.2) +
+    tm_layout(asp = 0, legend.outside= T, legend.outside.size = 0.1)
+```
+
+```{r}
+#| label: geographic-coverage-table
+#| echo: true
+#| eval: true
+#| message: false
+#| warning: false
+
+PA %>% 
+    group_by(country) %>%
+    summarise(`Number of records`= n(),
+              `presences`= sum(presence==1), 
+              `absences`= sum(presence==0), 
+              `Number of species`= n_distinct(scientificName)) %>% 
+  mutate(code=countrycode(country,
+                          origin = 'country.name',
+                          destination = 'iso2c')) %>%
+  relocate(country, code) %>% 
+  kableExtra::kbl()
+```
+
+**Number of countries represented in the PA data** = `r nrow(PA %>% distinct(countryCode))`
+
+## Taxonomic coverage
+
+Considering only the presences.
+
+```{r}
+#| label: taxonomic-coverage
+#| echo: true
+#| eval: true
+#| message: false
+#| warning: false
+
+data <- PA %>% filter(presence==1) %>% 
+  group_by(family) %>% 
+  summarise(n_records=n(), n_species=n_distinct(scientificName)) 
+
+packing <- circleProgressiveLayout(data$n_records, sizetype='area')
+data <- cbind(data, packing)
+packing$radius <- 0.95*packing$radius
+
+dat.gg <- circleLayoutVertices(packing, npoints=50)
+data$text <- paste('family: ', data$family, 
+                   '\n', 'records:', data$n_records, 
+                   '\n', 'species:', data$n_species)
+
+plot.gg <- ggplot() + 
+  geom_polygon_interactive(data = dat.gg,
+                           aes(x, y, group = id, fill=id,
+                               tooltip = data$text[id],
+                               data_id = id), colour = 'black', alpha = 0.6) +
+  scale_fill_continuous_interactive(type = 'viridis') +
+  geom_text(data = data, aes(x, y, label = gsub('Group_', '', family)), size=3, color='black') +
+  theme_void() + 
+  theme(legend.position='none', plot.margin=unit(c(0,0,0,0),'cm') ) + 
+  coord_equal()
+
+x <- girafe(ggobj = plot.gg)
+x
+
+PA %>%
+  group_by(scientificName, family) %>% count(presence) %>% 
+  mutate(presence = if_else(presence == 1, 'presence', 'absence')) %>% 
+  pivot_wider(names_from = presence, 
+              values_from = n, values_fill = 0) %>% 
+  rename(`Number of absences`= absence,
+         `Number of presences`= presence,) %>% 
+  kableExtra::kbl()
+```
+
+```{r}
+#| label: taxonomic-coverage-static
+#| echo: false
+#| eval: false
+#| message: false
+#| warning: false
+#| out-width: 100%
+#| fig-dpi: 100
+
+taxonomic_coverage_n_records <- ggplot(data, aes(x=family, y=n_records)) +  
+    geom_segment(aes(x=family, xend=family, y=0, 
+                     yend=n_records, col=family), show.legend = FALSE, linewidth=2) +
+    geom_point(aes(col=family), show.legend = FALSE, size=3) +
+    theme_bw() +
+    labs(x='', y= 'Number of records')
+
+taxonomic_coverage_n_species <- ggplot(data, aes(x=family, y=n_species)) +  
+    geom_segment(aes(x=family, xend=family, y=0, 
+                     yend=n_species, col=family), show.legend = FALSE, linewidth=2) +
+    geom_point(aes(col=family), show.legend = FALSE, size=3) +
+    ylim(0, 15) +
+    theme_bw() +
+    labs(x='', y= 'Number of species')
+
+taxonomic_coverage_n_records
+taxonomic_coverage_n_species
+```
+
+
+### Species not covered
+
+```{r}
+#| label: taxonomic-coverage-not-included
+#| echo: true
+#| eval: true
+#| message: false
+#| warning: false
+
+# species not included  
+carnivores %>% 
+  filter(!species %in% unique(PA$scientificName)) %>%
+  select(species, family) %>% arrange(family, species) %>% 
+  kableExtra::kbl()
+```
+
+## Temporal coverage
+
+```{r}
+#| label: temporal-coverage
+#| echo: true
+#| eval: true
+#| message: false
+#| warning: false
+#| out-width: 100%
+#| fig-height: 16
+#| fig-dpi: 100
+
+coef <- 150
+
+plot_records <- ggplot(PA, aes(x = dateStart, y = scientificName, colour = scientificName)) +
+  geom_segment(aes(xend = dateEnd, yend = scientificName), colour = 'black') +
+  geom_point(size = 3) +
+  geom_point(aes(x = dateEnd), size = 3) +
+  theme_bw() +
+  theme(legend.position = 'none') +
+  labs(x='', y='')
+
+plot_records <- ggplotly(plot_records)
+plot_records
+```
+
+
+```{r}
+#| label: temporal-coverage-static
+#| echo: false
+#| eval: false
+#| message: false
+#| warning: false
+#| out-width: 100%
+#| fig-dpi: 200
+#| fig-height: 16
+
+temporal_coverage <- ggplot(PA, aes(x = dateStart, 
+                                    y = scientificName, colour = scientificName)) +
+  geom_segment(aes(xend = dateEnd, yend = scientificName), colour = 'black') +
+  geom_point(size = 3) +
+  geom_point(aes(x = dateEnd), size = 3) +
+  theme_bw() +
+  theme(legend.position = 'none') +
+  labs(x='', y='')
+
+temporal_coverage
+```

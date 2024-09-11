@@ -1,0 +1,307 @@
+---
+title: "Presence-only data"
+format: 
+  html:
+    toc: true
+    toc-location: right
+    smooth-scroll: true
+    html-math-method: katex
+    df-print: kable
+    code-fold: true
+author: 'Florencia Grattarola'
+date: "`r format(Sys.time(), '%Y-%m-%d')`"
+editor: source
+self-contained: true
+---
+
+```{r}
+#| label: libraries
+#| echo: true
+#| eval: true
+#| message: false
+#| warning: false
+
+library(plotly)
+library(packcircles)
+library(ggiraph)
+library(countrycode)
+library(tmap)
+tmap_mode('view')
+library(sf)
+sf::sf_use_s2(FALSE)
+library(tidyverse)
+```
+
+## Data
+
+### List of species
+
+```{r}
+#| label: species
+#| echo: true
+#| eval: true
+#| message: false
+#| warning: false
+#| code-fold: false
+
+carnivores <- read_csv('data/carnivores.csv')
+```
+
+**Number of carnivore species in the Neotropics** = `r nrow(carnivores)`
+
+### Countries
+
+```{r}
+#| label: countries
+#| echo: true
+#| eval: true
+#| message: false
+#| warning: false
+#| code-fold: false
+
+countries <- st_read('data/latam.gpkg', layer = 'countries', quiet = T)
+```
+
+**Number of countries in the Neotropics** = `r nrow(countries %>% filter(!iso_a2 %in% c('TT', 'DO', 'CU', 'BS', 'JM', 'HT')))`
+
+### Presence only records
+
+```{r}
+#| label: data
+#| echo: true
+#| eval: true
+#| message: false
+#| warning: false
+#| code-fold: false
+
+PO <- read_csv('data/data_PO.csv')
+
+data_PO <- PO %>% 
+  st_as_sf(coords=c('decimalLongitude', 'decimalLatitude')) %>%
+  st_set_crs(4326)
+```
+
+**Number of PO records** = `r nrow(data_PO %>% st_drop_geometry)`  
+**Number of species represented in the PO data** = `r nrow(data_PO %>% distinct(scientificName))` (`r round((nrow(data_PO %>% distinct(scientificName)) / nrow(carnivores))*100, 1)` %)
+
+#### Sources
+
+Top 10 data publishers (institutions)
+
+```{r}
+#| label: sources
+#| echo: true
+#| eval: true
+#| message: false
+#| warning: false
+
+data_PO %>% st_drop_geometry() %>% 
+  count(institutionCode) %>% 
+  arrange(desc(n)) %>% filter(!is.na(institutionCode)) %>% 
+  slice_head(n=10) %>% 
+  mutate(`%` = formattable::percent(n / sum(n))) %>% 
+  kableExtra::kbl()
+```
+
+**Number of datasets involved in the PO data** = `r nrow(data_PO %>% distinct(datasetKey))`
+
+## Geographic coverage
+
+```{r}
+#| label: geographic-coverage-map
+#| echo: true
+#| eval: true
+#| message: false
+#| warning: false
+#| out-width: 100%
+#| fig-dpi: 200
+
+tmap_mode('plot')
+tm_shape(data_PO) +
+    tm_dots(col='year', size = 0.1, palette= 'Greys') + 
+    tm_facets(by = 'countryCode' ) +
+    tm_shape(countries) +
+    tm_borders(col='grey60', alpha = 0.5) +
+    tm_layout(asp = 0, legend.outside= T, legend.outside.size = 0.1)
+```
+
+```{r}
+#| label: geographic-coverage-table
+#| echo: true
+#| eval: true
+#| message: false
+#| warning: false
+
+data_PO %>% 
+  st_drop_geometry() %>% 
+  mutate(Country=countrycode(countryCode,
+                             origin = 'iso2c', 
+                             destination = 'country.name')) %>%
+  group_by(Country) %>%
+  summarise(`Number of records`=n(), 
+            `Number of species`=n_distinct(scientificName)) %>% 
+  mutate(code=countrycode(Country,
+                             origin = 'country.name', 
+                             destination = 'iso2c')) %>%
+  relocate(Country, code) %>% 
+  kableExtra::kbl()
+```
+
+**Number of countries represented in the PO data** = `r nrow(data_PO %>% st_drop_geometry() %>% distinct(countryCode))`
+
+## Taxonomic coverage
+
+```{r}
+#| label: taxonomic-coverage
+#| echo: true
+#| eval: true
+#| message: false
+#| warning: false
+
+data <- data_PO %>% st_drop_geometry() %>% 
+  group_by(family) %>% 
+  summarise(n_records=n(), n_species=n_distinct(scientificName)) 
+
+packing <- circleProgressiveLayout(data$n_records, sizetype='area')
+data <- cbind(data, packing)
+packing$radius <- 0.95*packing$radius
+
+dat.gg <- circleLayoutVertices(packing, npoints=50)
+data$text <- paste("family: ", data$family, 
+                   "\n", "records:", data$n_records, 
+                   "\n", "species:", data$n_species)
+
+plot.gg <- ggplot() + 
+  geom_polygon_interactive(data = dat.gg,
+                           aes(x, y, group = id, fill=id,
+                               tooltip = data$text[id],
+                               data_id = id), colour = "black", alpha = 0.6) +
+  scale_fill_continuous_interactive(type = 'viridis') +
+  geom_text(data = data, aes(x, y, label = gsub("Group_", "", family)), size=3, color="black") +
+  theme_void() + 
+  theme(legend.position="none", plot.margin=unit(c(0,0,0,0),"cm") ) + 
+  coord_equal()
+
+x <- girafe(ggobj = plot.gg)
+x
+
+data_PO %>% st_drop_geometry() %>% 
+  group_by(scientificName, family) %>% count %>% 
+  arrange(family, scientificName, n) %>% 
+  rename(`Number of records`=n) %>% 
+  kableExtra::kbl()
+
+```
+
+```{r}
+#| label: taxonomic-coverage-static
+#| echo: false
+#| eval: false
+#| message: false
+#| warning: false
+#| out-width: 100%
+#| fig-dpi: 100
+
+taxonomic_coverage_n_records <- ggplot(data, aes(x=family, y=n_records)) +  
+    geom_segment(aes(x=family, xend=family, y=0, 
+                     yend=n_records, col=family), show.legend = FALSE, linewidth=2) +
+    geom_point(aes(col=family), show.legend = FALSE, size=3) +
+    theme_bw() +
+    labs(x='', y= 'Number of records')
+
+taxonomic_coverage_n_species <- ggplot(data, aes(x=family, y=n_species)) +  
+    geom_segment(aes(x=family, xend=family, y=0, 
+                     yend=n_species, col=family), show.legend = FALSE, linewidth=2) +
+    geom_point(aes(col=family), show.legend = FALSE, size=3) +
+    ylim(0, 15) +
+    theme_bw() +
+    labs(x='', y= 'Number of species')
+
+taxonomic_coverage_n_records
+taxonomic_coverage_n_species
+```
+
+
+### Species not covered
+
+```{r}
+#| label: taxonomic-coverage-not-included
+#| echo: true
+#| eval: true
+#| message: false
+#| warning: false
+
+# species not included  
+carnivores %>% 
+  filter(!species %in% unique(data_PO$scientificName)) %>%
+  select(species, family) %>%  arrange(family, species) %>% 
+  kableExtra::kbl()
+```
+
+## Temporal coverage
+
+```{r}
+#| label: temporal-coverage
+#| echo: true
+#| eval: true
+#| message: false
+#| warning: false
+#| out-width: 100%
+#| fig-dpi: 100
+
+coef <- 150
+
+plot_records <- data_PO %>% st_drop_geometry() %>% 
+  mutate(date_observed = dmy(str_c(day, month, year, sep='-'))) %>% 
+  add_count(year, name='records_per_year') %>% 
+  group_by(year) %>% 
+  mutate(species_per_year= n_distinct(scientificName)) %>% ungroup() %>% 
+    ggplot(aes(x=date_observed)) +
+    geom_line(aes(y=records_per_year, col='Records'), 
+              linewidth=1, col=RColorBrewer::brewer.pal(9, 'Set1')[2]) +
+    scale_y_continuous(n.breaks = 10) +
+    scale_x_date(date_breaks = "2 years", date_labels = "%Y") +
+    theme_bw() + labs(x='',, y='Number of records', col='')
+
+plot_species <- data_PO %>% st_drop_geometry() %>% 
+  mutate(date_observed = dmy(str_c(day, month, year, sep='-'))) %>% 
+  add_count(year, name='records_per_year') %>% 
+  group_by(year) %>% mutate(species_per_year= n_distinct(scientificName)) %>% ungroup() %>% 
+  ggplot(aes(x=date_observed)) +
+  geom_line(aes(y=species_per_year, col='species'), linewidth=1, 
+            col=RColorBrewer::brewer.pal(9, 'Set1')[1]) +
+  scale_x_date(date_breaks = "2 years", date_labels = "%Y") +
+  theme_bw() + labs(x='',, y='Number of species', col='')
+
+plot_records <- ggplotly(plot_records)
+plot_records
+plot_species <- ggplotly(plot_species)
+plot_species
+```
+
+
+```{r}
+#| label: temporal-coverage-static
+#| echo: false
+#| eval: false
+#| message: false
+#| warning: false
+#| out-width: 100%
+#| fig-dpi: 100
+
+temporal_coverage <- data_PO %>% st_drop_geometry() %>%
+  mutate(date_observed = dmy(str_c(day, month, year, sep='-'))) %>%
+  add_count(year, name='records_per_year') %>%
+  group_by(year) %>% mutate(species_per_year= n_distinct(scientificName)) %>% ungroup() %>%
+  ggplot(aes(x=date_observed)) +
+  geom_line(aes(y=species_per_year, col='Species'), linewidth=1) +
+  geom_line(aes(y=records_per_year/coef, col='Records'), linewidth=1) +
+  scale_color_brewer(palette = 'Set1') +
+  scale_y_continuous(name = expression(paste('Number of species')),
+                     sec.axis = sec_axis(~.*coef, name= 'Number of records',
+                                         breaks = seq(0,10000,1000)), n.breaks = 10) +
+  scale_x_date(date_breaks = "2 years", date_labels = "%Y") +
+  theme_bw() + labs(x='', col='')
+
+temporal_coverage
+```

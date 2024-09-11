@@ -1,0 +1,179 @@
+---
+title: "Data sources, species and countries"
+format: 
+  html:
+    toc: true
+    toc-location: right
+    smooth-scroll: true
+    html-math-method: katex
+    df-print: kable
+    code-fold: true
+author: 'Florencia Grattarola'
+date: "`r format(Sys.time(), '%Y-%m-%d')`"
+editor: source
+self-contained: true
+---
+
+R libraries
+
+```{r}
+#| label: libraries
+#| echo: true
+#| eval: true
+#| message: false
+#| warning: false
+
+library(tmap)
+tmap_mode('view')
+library(sf)
+sf::sf_use_s2(FALSE)
+library(tidyverse)
+```
+
+
+### List of species
+
+```{r}
+#| label: species
+#| echo: true
+#| eval: true
+#| message: false
+#| warning: false
+
+carnivores <- read_csv('data/carnivores.csv')
+carnivores %>% kableExtra::kbl()
+```
+
+**Number of carnivore species** = `r nrow(carnivores)`
+
+### Countries
+
+```{r}
+#| label: countries
+#| echo: true
+#| eval: true
+#| message: false
+#| warning: false
+
+countries <- st_read('data/latam.gpkg', layer = 'countries', quiet = T)
+countries_land <- st_read('data/latam.gpkg', layer = 'countries_land', quiet = T)
+
+tm_shape(countries_land) +
+    tm_fill(col = 'name_en',
+            palette = 'Set1', 
+            title= '') + 
+    tm_layout(legend.outside = T) 
+```
+
+
+### Data sources
+
+```{r}
+#| label: data
+#| echo: true
+#| eval: true
+#| message: false
+#| warning: false
+
+PO <- read_csv('data/data_PO.csv')
+PA <- read_csv('data/data_PA.csv')
+
+PO %>% summarise(`Number of records`=n(),
+                 `Number of species`=n_distinct(scientificName),
+                 `Number of datasets`=n_distinct(datasetKey)) %>% 
+  kableExtra::kbl(caption = 'presence-only', align = 'l')
+
+PA %>% summarise(`Number of records` = n(),
+                 `Number of records`= n(),
+                 `Number of species` = n_distinct(scientificName),
+                 `Number of sources` = n_distinct(datasetName)) %>% 
+  kableExtra::kbl(caption = 'presence-absence', align = 'l')
+```
+
+**Total number of species covered** = `r nrow(bind_rows(PO %>% distinct(scientificName), PA%>% distinct(scientificName)) %>% distinct(scientificName))`. 
+
+#### Species not covered
+
+```{r}
+#| label: species-not-covered
+#| echo: true
+#| eval: true
+#| message: false
+#| warning: false
+
+carnivores %>% 
+  filter(!species %in%
+           (bind_rows(PO %>% distinct(scientificName),
+                      PA %>% distinct(scientificName)) %>% 
+              pull(scientificName))) %>%
+  select(species, family) %>% 
+  kableExtra::kbl()
+```
+
+#### Number of records per species
+
+```{r}
+#| label: data-count-per-species
+#| echo: true
+#| eval: true
+#| message: false
+#| warning: false
+
+PO %>% count(scientificName, family) %>% 
+  arrange(family, scientificName) %>% 
+  kableExtra::kbl(caption = 'presence-only', align = 'l')
+
+PA %>% count(scientificName, family) %>% 
+  arrange(family, scientificName) %>% 
+  kableExtra::kbl(caption = 'presence-absence', align = 'l')
+```
+
+### Files 
+
+Presence-only column names
+
+```{r}
+#| label: data-columns-PO
+#| echo: true
+#| eval: true
+#| message: false
+#| warning: false
+
+PO %>% names() %>% 
+  as_tibble_col(column_name = 'column name') %>% 
+  kableExtra::kbl(align = 'l')
+```
+
+
+Presence-absence column names
+
+```{r}
+#| label: data-columns-PA
+#| echo: true
+#| eval: true
+#| message: false
+#| warning: false
+
+PA %>% names() %>% 
+  as_tibble_col(column_name = 'column name') %>% 
+  kableExtra::kbl(align = 'l')
+```
+
+### Save the metadata files
+
+```{r}
+#| label: PA-polygons-save
+#| echo: true
+#| eval: false
+#| message: false
+#| warning: false
+#| code-fold: false
+
+PO %>% names() %>%
+  as_tibble_col(column_name = 'columnName') %>%
+  write_excel_csv('metadata/PO_metadata.csv')
+
+PA %>% names() %>%
+  as_tibble_col(column_name = 'columnName') %>%
+  write_excel_csv('metadata/PA_metadata.csv')
+```

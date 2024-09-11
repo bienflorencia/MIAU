@@ -1,0 +1,37 @@
+﻿columnName,standardTerm,definition
+recordID,,occurrenceID for the PA data
+datasetName,http://rs.tdwg.org/dwc/terms/datasetName,
+decimalLatitude,http://rs.tdwg.org/dwc/terms/decimalLatitude,
+decimalLongitude,http://rs.tdwg.org/dwc/terms/decimalLongitude,
+country,http://rs.tdwg.org/dwc/terms/country,
+countryCode,http://rs.tdwg.org/dwc/terms/countryCode,
+stateProvince,http://rs.tdwg.org/dwc/terms/stateProvince,
+locality,http://rs.tdwg.org/dwc/terms/locality,
+isProtectedArea,,"Report of whether the sampling site is located whithin a protected area, values 'yes', 'no' and 'partially'"
+eventDurationValue,http://rs.tdwg.org/eco/terms/eventDurationValue,
+eventDurationUnit,http://rs.tdwg.org/eco/terms/eventDurationUnit,
+dateStart,,Date when the sampling event started (YYYY-MM-DD)
+dateEnd,,Date when the sampling event ended (YYYY-MM-DD)
+eventDate,http://rs.tdwg.org/dwc/terms/eventDate,
+protocolNames,http://rs.tdwg.org/eco/terms/protocolNames,
+samplingEffortValue,http://rs.tdwg.org/eco/terms/samplingEffortValue,
+samplingEffortUnit,http://rs.tdwg.org/eco/terms/samplingEffortUnit,
+samplingEffortProtocol,http://rs.tdwg.org/eco/terms/samplingEffortProtocol,
+totalAreaSampledValue,http://rs.tdwg.org/eco/terms/totalAreaSampledValue,
+totalAreaSampledUnit,http://rs.tdwg.org/eco/terms/totalAreaSampledUnit,
+totalAreaSampledRemarks,,Remarks about the area of the sampling event
+kingdom,http://rs.tdwg.org/dwc/terms/kingdom,
+phylum,http://rs.tdwg.org/dwc/terms/phylum,
+class,http://rs.tdwg.org/dwc/terms/class,
+order,http://rs.tdwg.org/dwc/terms/order,
+family,http://rs.tdwg.org/dwc/terms/family,
+genus,http://rs.tdwg.org/dwc/terms/genus,
+specificEpithet,http://rs.tdwg.org/dwc/terms/specificEpithet,
+scientificName,http://rs.tdwg.org/dwc/terms/scientificName,
+vernacularName,http://rs.tdwg.org/dwc/terms/vernacularName,
+presence,,Recorded presence (=1) or absence (=0) of the species
+abundance,,Recorded abundance of the species
+abundanceUnits,,"Units reported for the recorded abundance of the species, values 'NOIR': number of individual records, 'RAI': relative abundance index, 'AI/month': abundance index per month"
+dataSource,,"Source of the record, either literature or data paper (DOI: 10.1002/ecy.3128)"
+datasetID,http://rs.tdwg.org/dwc/terms/datasetID,
+eventDurationRemarks,,Remarks about the duration of the sampling event

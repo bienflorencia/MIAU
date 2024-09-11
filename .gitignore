@@ -51,3 +51,5 @@ rsconnect/
 
 # folders
 data/raw
+code/_draft
+/.quarto/

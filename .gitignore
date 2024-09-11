@@ -50,6 +50,7 @@ rsconnect/
 .DS_Store
 
 # folders
+figs/
 data/_draft
 code/_draft
 /.quarto/

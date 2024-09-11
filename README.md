@@ -21,7 +21,7 @@
 - `data/data_PA.csv`: cleaned, standardised and harmonised presence-absence data.
 - `metadata/metadata_PA.csv`: column names, standard terms (e.g., Darwin Core or Humboldt Core), and definitions for the presence-absence data.
 
-- `data/carnivores.csv`: carnivore species list extracted from the (Mammal Diversity Database, 2022), including the family, taxon key from GBIF and IUCN conservation status.
+- `data/carnivores.csv`: carnivore species list extracted from the Mammal Diversity Database (2022), including the family, taxon key from GBIF and IUCN conservation status.
 
 ### Spatial files
 

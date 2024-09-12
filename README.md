@@ -4,7 +4,7 @@
 
 ## An analysis-ready database on presence-only and presence-absence data of Neotropical carnivores (Mammalia: Carnivora) from 2000 to 2021.
 
-[Explore the manuscripts' code and figures here]().
+Explore the manuscripts' code and figures here []().
 
 ## **Source data**: the downloaded/digitised *raw* data sources
 

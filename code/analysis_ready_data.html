@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="Florencia Grattarola">
-<meta name="dcterms.date" content="2024-09-11">
+<meta name="dcterms.date" content="2024-09-12">
 
 <title>Prepare analysis-ready data</title>
 <style>
@@ -3131,7 +3131,7 @@ vertical-align: -.125em;
     <div>
     <div class="quarto-title-meta-heading">Published</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">September 11, 2024</p>
+      <p class="date">September 12, 2024</p>
     </div>
   </div>
   
@@ -3155,14 +3155,8 @@ vertical-align: -.125em;
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>countries <span class="ot">&lt;-</span> <span class="fu">st_read</span>(<span class="st">&#39;data/latam.gpkg&#39;</span>, <span class="at">quiet =</span> T, <span class="at">layer=</span><span class="st">&#39;countries&#39;</span>)</span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>latam <span class="ot">&lt;-</span> <span class="fu">st_read</span>(<span class="st">&#39;data/latam.gpkg&#39;</span>, <span class="at">quiet =</span> T, <span class="at">layer=</span><span class="st">&#39;latam&#39;</span>)</span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>PO_gbif <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(<span class="st">&#39;data/DATA_presence-only-gbif.csv&#39;</span>) </span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>PO_datapaper <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(<span class="st">&#39;data/DATA_presence-only-datapaper.csv&#39;</span>) <span class="sc">%&gt;%</span> </span>
-<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">occurrenceID =</span> <span class="fu">as.character</span>(occurrenceID))</span>
-<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>PO <span class="ot">&lt;-</span> <span class="fu">bind_rows</span>(PO_gbif, PO_datapaper)</span>
-<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>PA_datapaper <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(<span class="st">&#39;data/DATA_presence-absence-datapaper.csv&#39;</span>)</span>
-<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>PA_literature <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(<span class="st">&#39;data/DATA_presence-absence-literature.csv&#39;</span>)</span>
-<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>PA <span class="ot">&lt;-</span> <span class="fu">bind_rows</span>(PA_datapaper, PA_literature)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>PO <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(<span class="st">&#39;data/data_PO.csv&#39;</span>)</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>PA <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(<span class="st">&#39;data/data_PA.csv&#39;</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 <section id="presence-only-grid-cells" class="level2">

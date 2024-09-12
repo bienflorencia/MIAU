@@ -40,14 +40,8 @@ library(tidyverse)
 countries <- st_read('data/latam.gpkg', quiet = T, layer='countries')
 latam <- st_read('data/latam.gpkg', quiet = T, layer='latam')
 
-PO_gbif <- read_csv('data/DATA_presence-only-gbif.csv') 
-PO_datapaper <- read_csv('data/DATA_presence-only-datapaper.csv') %>% 
-  mutate(occurrenceID = as.character(occurrenceID))
-PO <- bind_rows(PO_gbif, PO_datapaper)
-
-PA_datapaper <- read_csv('data/DATA_presence-absence-datapaper.csv')
-PA_literature <- read_csv('data/DATA_presence-absence-literature.csv')
-PA <- bind_rows(PA_datapaper, PA_literature)
+PO <- read_csv('data/data_PO.csv')
+PA <- read_csv('data/data_PA.csv')
 ```
 
 ## Presence-only grid-cells

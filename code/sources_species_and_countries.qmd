@@ -84,7 +84,6 @@ PO %>% summarise(`Number of records`=n(),
   kableExtra::kbl(caption = 'presence-only', align = 'l')
 
 PA %>% summarise(`Number of records` = n(),
-                 `Number of records`= n(),
                  `Number of species` = n_distinct(scientificName),
                  `Number of sources` = n_distinct(datasetName)) %>% 
   kableExtra::kbl(caption = 'presence-absence', align = 'l')
@@ -119,13 +118,18 @@ carnivores %>%
 #| message: false
 #| warning: false
 
-PO %>% count(scientificName, family) %>% 
-  arrange(family, scientificName) %>% 
-  kableExtra::kbl(caption = 'presence-only', align = 'l')
-
-PA %>% count(scientificName, family) %>% 
-  arrange(family, scientificName) %>% 
-  kableExtra::kbl(caption = 'presence-absence', align = 'l')
+left_join(
+  PO %>% 
+  count(scientificName, family) %>% rename(PO_n = n) %>% 
+  arrange(family, scientificName),
+  PA %>%  filter(presence ==1) %>% 
+  count(scientificName, family) %>% rename(PA_n = n) %>% 
+  arrange(family, scientificName)
+) %>% mutate(PO_n = if_else(is.na(PO_n), 0, PO_n),
+             PA_n = if_else(is.na(PA_n), 0, PA_n)) %>% 
+  rename(`Number of PO records` = PO_n,
+         `Number of PA records` = PA_n) %>% 
+  kableExtra::kbl(align = 'l')
 ```
 
 ### Files 

@@ -6,7 +6,7 @@
 
 ## **Source data**: the downloaded/digitised *raw* data sources
 
-- 64 literature sources. See the files [`literature_all_references.ods`](metadata/literature_all_references.ods) for a complete list and `literature_digitised_references.bib` for the *BibTeX* bibliographical database.
+- 64 literature sources. See the files [`literature_all_references.ods`](metadata/literature_all_references.ods) for a complete list and [`literature_digitised_references.bib`](metadata/literature_digitised_references.bib) for the *BibTeX* bibliographical database.
 
 - GBIF.org. (2024). 'Occurrence Download Neotropical Carnivores'. https://doi.org/10.15468/dl.67zvau 
 
@@ -15,13 +15,13 @@
 ## **Underlying data**: the data we generated
 
 ### Tables
-- `data/data_PO.csv`: cleaned, standardised and harmonised presence-only data.
-- `metadata/metadata_PO.csv`: column names, standard terms (e.g., Darwin Core or Humboldt Core), and definitions for the presence-only data.
+- [`data_PO.csv`](data/data_PO.csv): cleaned, standardised and harmonised presence-only data.
+- [`metadata/metadata_PO.csv`](metadata/metadata_PO.csv): column names, standard terms (e.g., Darwin Core or Humboldt Core), and definitions for the presence-only data.
 
-- `data/data_PA.csv`: cleaned, standardised and harmonised presence-absence data.
-- `metadata/metadata_PA.csv`: column names, standard terms (e.g., Darwin Core or Humboldt Core), and definitions for the presence-absence data.
+- [`data_PA.csv`](data/data_PA.csv): cleaned, standardised and harmonised presence-absence data.
+- [`metadata/metadata_PA.csv`](metadata/metadata_PA.csv): column names, standard terms (e.g., Darwin Core or Humboldt Core), and definitions for the presence-absence data.
 
-- `data/carnivores.csv`: carnivore species list extracted from the Mammal Diversity Database (2022), including the family, taxon key from GBIF and IUCN conservation status.
+- [`data/carnivores.csv`](data/carnivores.csv): carnivore species list extracted from the Mammal Diversity Database (2022), including the family, taxon key from GBIF and IUCN conservation status.
 
 ### Spatial files
 

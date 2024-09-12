@@ -6,7 +6,7 @@
 
 ## **Source data**: the downloaded/digitised *raw* data sources
 
-- 64 literature sources. See the files `literature_all_references.ods` for a complete list and `literature_digitised_references.bib` for the *BibTeX* bibliographical database.
+- 64 literature sources. See the files [`literature_all_references.ods`](metadata/literature_all_references.ods) for a complete list and `literature_digitised_references.bib` for the *BibTeX* bibliographical database.
 
 - GBIF.org. (2024). 'Occurrence Download Neotropical Carnivores'. https://doi.org/10.15468/dl.67zvau 
 

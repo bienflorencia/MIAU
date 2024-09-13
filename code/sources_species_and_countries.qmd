@@ -132,6 +132,33 @@ left_join(
   kableExtra::kbl(align = 'l')
 ```
 
+#### Number of records per country
+
+```{r}
+#| label: data-count-per-country
+#| echo: true
+#| eval: true
+#| message: false
+#| warning: false
+
+left_join(
+  PO %>%
+    count(scientificName, family, country) %>% rename(PO_n = n) %>%
+    arrange(scientificName, family) %>%
+    pivot_wider(names_from = country, values_from = PO_n) %>% 
+    janitor::adorn_totals('row') %>% as_tibble() %>% filter(scientificName=='Total') %>% 
+    pivot_longer(cols = 3:23) %>% arrange(desc(value)) %>% 
+    select(country=name, `Number of PO records`=value),
+  PA %>% filter(presence ==1) %>% 
+    count(scientificName, family, country) %>% rename(PA_n = n) %>%
+    arrange(scientificName, family) %>%
+    pivot_wider(names_from = country, values_from = PA_n) %>% 
+    janitor::adorn_totals('row') %>% as_tibble() %>% filter(scientificName=='Total') %>% 
+    pivot_longer(cols = 3:20) %>% arrange(desc(value)) %>% 
+    select(country=name, `Number of PA records`=value)
+) %>% kableExtra::kbl(align = 'l')
+```
+
 ### Files 
 
 Presence-only column names

@@ -52,5 +52,6 @@ rsconnect/
 # folders
 figs/
 data/_draft
+data/raw
 code/_draft
 /.quarto/

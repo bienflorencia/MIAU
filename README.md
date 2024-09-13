@@ -21,9 +21,9 @@ Explore the manuscripts' code and figures here []().
 - [`metadata/metadata_PO.csv`](metadata/metadata_PO.csv): a csv file with the column names, standard terms (e.g., Darwin Core or Humboldt Core), and definitions for the presence-only data.
 
 - [`data/data_PA.csv`](data/data_PA.csv): a csv file with the cleaned, standardised and harmonised presence-absence data.
-- [`metadata/metadata_PA.csv`](metadata/metadata_PA.csv): a csv file with the column names, standard terms (e.g., Darwin Core or Humboldt Core), and definitions for the presence-absence data.
+- [`metadata/metadata_PA.csv`](metadata/metadata_PA.csv): a csv file with the column names, standard terms (e.g., [Darwin Core](https://dwc.tdwg.org) or [Humboldt Core](https://eco.tdwg.org)), and definitions for the presence-absence data.
 
-- [`data/carnivores.csv`](data/carnivores.csv): a csv file with the carnivore species list extracted from the Mammal Diversity Database (https://doi.org/10.5281/zenodo.5945626), including the family, taxon key from GBIF and IUCN conservation status.
+- [`data/carnivores.csv`](data/carnivores.csv): a csv file with the carnivore species list extracted from the [Mammal Diversity Database](https://doi.org/10.5281/zenodo.5945626), including the family, taxon key from GBIF and IUCN conservation status.
 
 ### Spatial files
 

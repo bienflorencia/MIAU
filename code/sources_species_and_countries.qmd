@@ -175,9 +175,9 @@ PA %>% names() %>%
 
 PO %>% names() %>%
   as_tibble_col(column_name = 'columnName') %>%
-  write_excel_csv('metadata/PO_metadata.csv')
+  write_excel_csv('metadata/metadata_PO.csv')
 
 PA %>% names() %>%
   as_tibble_col(column_name = 'columnName') %>%
-  write_excel_csv('metadata/PA_metadata.csv')
+  write_excel_csv('metadata/metadata_PA.csv')
 ```

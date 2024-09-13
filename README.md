@@ -18,7 +18,7 @@ Explore the manuscripts' code and figures here []().
 
 ### Tables
 - [`data/data_PO.csv`](data/data_PO.csv): a csv file with the cleaned, standardised and harmonised presence-only data.
-- [`metadata/metadata_PO.csv`](metadata/metadata_PO.csv): a csv file with the column names, standard terms (e.g., Darwin Core or Humboldt Core), and definitions for the presence-only data.
+- [`metadata/metadata_PO.csv`](metadata/metadata_PO.csv): a csv file with the column names, standard terms (e.g., [Darwin Core](https://dwc.tdwg.org) or [Humboldt Core](https://eco.tdwg.org)), and definitions for the presence-only data.
 
 - [`data/data_PA.csv`](data/data_PA.csv): a csv file with the cleaned, standardised and harmonised presence-absence data.
 - [`metadata/metadata_PA.csv`](metadata/metadata_PA.csv): a csv file with the column names, standard terms (e.g., [Darwin Core](https://dwc.tdwg.org) or [Humboldt Core](https://eco.tdwg.org)), and definitions for the presence-absence data.

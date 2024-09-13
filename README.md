@@ -4,8 +4,6 @@
 
 ## An analysis-ready database on presence-only and presence-absence data of Neotropical carnivores (Mammalia: Carnivora) from 2000 to 2021.
 
-Explore the manuscripts' code and figures here []().
-
 ## 1) **Source data**: the downloaded/digitised *raw* data sources
 
 - 64 literature sources. See the files [`literature_all_references.ods`](metadata/literature_all_references.ods) for a complete list and [`literature_digitised_references.bib`](metadata/literature_digitised_references.bib) for the *BibTeX* bibliographical database.

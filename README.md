@@ -62,9 +62,3 @@ In the last decade, databases of records of species observed at the same locatio
 > Grattarola F., Tschernosterová K., & Keil P. (2024); POPANC: An analysis-ready database on presence-only and presence-absence data of Neotropical carnivores (Mammalia: Carnivora) from 2000 to 2021; Zenodo; [DOI from Zenodo provided once the GitHub repository is archived]. [Dataset] / [Code]
 
 If you use our underlying data, please also cite the **source** data as well.
-
---- 
-
-~~~
-As the project has ended, we do not plan to update the dataset soon. However, with our data structure description, detailed data cleaning and standardisation workflow, and code available, we encourage future users to update the dataset as needed. 
-~~~

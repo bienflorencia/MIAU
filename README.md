@@ -6,6 +6,9 @@
 
 In the last decade, databases of records of species observed at the same location at different points in time over large spatial extents have been made available. Unfortunately, these sources are scarce in regions such as Latin America. We present a dataset of 60,179 point occurrences (i.e. presence-only data, PO) and 45,468 camera trap survey records (i.e. presence-absence data, PA) for 63 species of carnivores of the Neotropical region from 2000 to 2021. We collated the data from various sources, including 64 newly digitised bibliographic references. We cleaned, taxonomically harmonised, and standardised the data following the Darwin Core and Humboldt Core standards and present them here as csv files. We have also made these data fit for analyses by aggregating the data into two time periods (time1: 2000-2013 and time2: 2014-2021), with PO grid cell counts of 100 x 100 km, and PA polygons of varying size, presented as geopackage files. These data can be used for large-scale species distribution models, calculation of population trends, extinction risk analyses, and educational purposes.
 
+--- 
+
+**Disclaimer**: As the project has ended, we do not plan to update the dataset soon. However, with our data structure description, detailed data cleaning and standardisation workflow, and code available, we encourage future users to update the dataset as needed. 
 
 ## 1) **Source data**: the downloaded/digitised data sources
 
@@ -50,10 +53,6 @@ In the last decade, databases of records of species observed at the same locatio
 - [`code/presence-absence.qmd`](code/presence-absence.qmd): an overview of the presence-absence records in the database, including the geographic, taxonomic and temporal coverage of the data.
 - [`code/presence-only.qmd`](code/presence-only.qmd): an overview of the presence-only records in the database, including the geographic, taxonomic and temporal coverage of the data. 
 - [`code/analysis_ready_data.qmd`](code/analysis_ready_data.qmd): a full descriptive code to reproduce the generation of `PO.gpk` and `PA.gpk`.
-
----
-
-As the project has ended, we do not plan to update the dataset soon. However, with our data structure description, detailed data cleaning and standardisation workflow, and code available, we encourage future users to update the dataset as needed. 
 
 ## LICENCE
 

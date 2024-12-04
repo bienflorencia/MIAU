@@ -2,7 +2,10 @@
 
 *Florencia Grattarola <a dir="ltr" href="http://orcid.org/0000-0001-8282-5732" target="_blank"><img class="is-rounded" src="https://upload.wikimedia.org/wikipedia/commons/0/06/ORCID_iD.svg" width="15"></a>, Kateřina Tschernosterová, Petr Keil*
 
-## An analysis-ready database on presence-only and presence-absence data of Neotropical carnivores (Mammalia: Carnivora) from 2000 to 2021.
+## An analysis-ready dataset on presence-only and presence-absence data of Neotropical carnivores (Mammalia: Carnivora) from 2000 to 2021
+
+In the last decade, databases of records of species observed at the same location at different points in time over large spatial extents have been made available. Unfortunately, these sources are scarce in regions such as Latin America. We present a dataset of 60,179 point occurrences (i.e. presence-only data, PO) and 45,468 camera trap survey records (i.e. presence-absence data, PA) for 63 species of carnivores of the Neotropical region from 2000 to 2021. We collated the data from various sources, including 64 newly digitised bibliographic references. We cleaned, taxonomically harmonised, and standardised the data following the Darwin Core and Humboldt Core standards and present them here as csv files. We have also made these data fit for analyses by aggregating the data into two time periods (time1: 2000-2013 and time2: 2014-2021), with PO grid cell counts of 100 x 100 km, and PA polygons of varying size, presented as geopackage files. These data can be used for large-scale species distribution models, calculation of population trends, extinction risk analyses, and educational purposes.
+
 
 ## 1) **Source data**: the downloaded/digitised *raw* data sources
 

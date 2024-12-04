@@ -8,7 +8,9 @@ In the last decade, databases of records of species observed at the same locatio
 
 --- 
 
-**Disclaimer**: As the project has ended, we do not plan to update the dataset soon. However, with our data structure description, detailed data cleaning and standardisation workflow, and code available, we encourage future users to update the dataset as needed. 
+ - As the project has ended, we do not plan to update the dataset soon. However, with our data structure description, detailed data cleaning and standardisation workflow, and code available, we encourage future users to update the dataset as needed. 
+
+---
 
 ## 1) **Source data**: the downloaded/digitised data sources
 
